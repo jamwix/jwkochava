@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	
+	<ndll name="jwkochava" if="ios"/>
+	
+	<!-- Use the following for an Android Java extension, not needed otherwise -->
+	
+	<dependency name="jwkochava" path="dependencies/android" if="android" />
+	<android extension="com.jamwix.JWKochava" />
+	
+</project>
