@@ -22,6 +22,8 @@ class JWKochava {
 	#elseif ios
 	private static var jwkochava_init = Lib.load("jwkochava", "jwkochava_init", 1);
 	private static var jwkochava_track_event = Lib.load("jwkochava", "jwkochava_track_event", 2);
+	private static var jwkochava_get_kochava_id = Lib.load("jwkochava", "jwkochava_get_kochava_id", 0);
+	private static var jwkochava_identity_link = Lib.load("jwkochava", "jwkochava_identity_link", 1);
 	#end
 
 	private static var _initialized = false;
@@ -49,6 +51,34 @@ class JWKochava {
 	{
 #if (ios || android)
 		jwkochava_track_event(title, value);
+#end
+	}
+
+	public static function identityLink(opts:Dynamic)
+	{
+		if (opts == null) return;
+
+		var optsStr:String = "{}";
+		try
+		{
+			optsStr = Json.stringify(opts);
+		}
+		catch (err:String)
+		{
+			trace("identityLink stringify err: " + err);
+		}
+
+#if (ios || android)
+		jwkochava_identity_link(optsStr);
+#end
+	}
+
+	public static function getKochavaId():String
+	{
+#if (ios || android)
+		return jwkochava_get_kochava_id();
+#else
+		return null;
 #end
 	}
 }
