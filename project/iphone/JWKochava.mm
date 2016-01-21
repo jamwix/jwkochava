@@ -43,6 +43,16 @@
     return deviceId;
 }
 
+- (NSString*)getAttributionData
+{
+    NSDictionary* data = [kochavaTracker retrieveAttribution];
+    if (!data) 
+    {
+        return @"{\"network\": \"unknown\"}";
+    }
+
+}
+
 @end
 
 extern "C"

@@ -15,6 +15,7 @@ import android.util.Log;
 import org.json.JSONObject;
 import org.json.JSONException;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.haxe.extension.Extension;
 import org.haxe.lime.HaxeObject;
@@ -124,6 +125,7 @@ public class JWKochava extends Extension {
         final HashMap<String, Object> datamap = new HashMap<String, Object>();
         datamap.put(Feature.INPUTITEMS.KOCHAVA_APP_ID , appId );
         datamap.put(Feature.INPUTITEMS.CURRENCY , currency);
+        datamap.put(Feature.INPUTITEMS.REQUEST_ATTRIBUTION, true);
 
         mHandler.post(new Runnable() {
             public void run() {
@@ -140,6 +142,57 @@ public class JWKochava extends Extension {
                 _kTracker.event(myTitle, myValue);
             }
         });
+    }
+
+    public static void identityLink(String sOptions) {
+        JSONObject options;
+
+        try {
+            options = new JSONObject(sOptions);
+        } catch (JSONException e) {
+            Log.e(TAG, "Unable to parse kochava identityLink params");
+            return;
+        }
+
+        Iterator<String> keys = options.keys();
+
+        final HashMap<String, String> datamap = new HashMap<String, String>();
+        while (keys.hasNext()) {
+            String key = (String)keys.next();
+            try {
+                datamap.put(key, options.getString(key));
+            } catch (JSONException e) {
+                Log.e(TAG, "Unable to parse kochava identityLink param");
+                return;
+            }
+        }
+
+        mHandler.post(new Runnable() {
+            public void run() {
+                _kTracker.linkIdentity(datamap);
+            }
+        });
+    }
+
+    public static String getKochavaId() {
+        return Feature.getKochavaDeviceId();
+    }
+
+    public static String getAttributionData() {
+        String data = null;
+        if (_kTracker != null) {
+            data = _kTracker.getAttributionData();
+        }
+
+        if (data == null || data == "") {
+            return "{\"network_name\": \"unknown\"}";
+        }
+
+        if (data == "false") {
+            return "{\"network_name\": \"organic\"}";
+        }
+
+        return data;
     }
 
 

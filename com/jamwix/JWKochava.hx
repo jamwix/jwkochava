@@ -19,11 +19,25 @@ class JWKochava {
 		JNI.createStaticMethod("com.jamwix.JWKochava", "initKochava", "(Ljava/lang/String;)V");
 	private static var jwkochava_track_event = 
 		JNI.createStaticMethod("com.jamwix.JWKochava", "trackEvent", "(Ljava/lang/String;Ljava/lang/String;)V");
+	private static var jwkochava_identity_link =
+		JNI.createStaticMethod("com.jamwix.JWKochava", "identityLink", "(Ljava/lang/String;)V");
+	private static var jwkochava_get_kochava_id = 
+		JNI.createStaticMethod("com.jamwix.JWKochava", "getKochavaId", "()Ljava/lang/String;");
+	private static var jwkochava_get_attribution_data = JNI.createStaticMethod(
+		"com.jamwix.JWKochava",
+		"getAttributionData",
+		"()Ljava/lang/String;"
+	);
 	#elseif ios
 	private static var jwkochava_init = Lib.load("jwkochava", "jwkochava_init", 1);
 	private static var jwkochava_track_event = Lib.load("jwkochava", "jwkochava_track_event", 2);
 	private static var jwkochava_get_kochava_id = Lib.load("jwkochava", "jwkochava_get_kochava_id", 0);
 	private static var jwkochava_identity_link = Lib.load("jwkochava", "jwkochava_identity_link", 1);
+	private static var jwkochava_get_attribution_data = Lib.load(
+			"jwkochava",
+			"jwkochava_get_attribution_data",
+			0
+	);
 	#end
 
 	private static var _initialized = false;
@@ -41,6 +55,9 @@ class JWKochava {
 			limitAdtracking: limitAdtracking ? 1 : 0,
 			enableLogging: enableLogging ? 1 : 0
 		};
+#if ios
+		options.retrieveAttribution = 1;
+#end
 		jwkochava_init(Json.stringify(options));
 
 		_initialized = true;
@@ -79,6 +96,28 @@ class JWKochava {
 		return jwkochava_get_kochava_id();
 #else
 		return null;
+#end
+	}
+
+	public static function getAttributionData():Dynamic
+	{
+#if (ios || android)
+		var dataStr:String = jwkochava_get_attribution_data();
+		var data:Dynamic;
+		try {
+			data = Json.parse(dataStr);
+		} catch (err:String) {
+			trace("unable to parse attr data: " + dataStr + " ERR: " + err);
+			return {network_name: "unknown"};
+		}
+
+		if (data.network_name == null && data.network == null)
+		{
+			data.network_name = "organic";
+		}
+		return data;
+#else
+		return {network_name: "unknown"};
 #end
 	}
 }
