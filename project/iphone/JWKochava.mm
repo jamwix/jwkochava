@@ -3,15 +3,18 @@
 #import "TrackAndAd.h"
 #include "JWKochava.h"
 
-@interface JWKochava:NSObject
+@interface JWKochava:NSObject <KochavaTrackerClientDelegate>
 {
     KochavaTracker *kochavaTracker;
+    NSDictionary *_attrResult;
 }
 
 - (void)initWithOptions:(NSDictionary*) options;
 - (void)trackEvent:(NSString*) eventTitle withValue:(NSString*) eventValue;
 - (void)identityLink:(NSDictionary*) options;
 - (NSString*)getKochavaId;
+- (NSString*)getAttributionData;
+- (void) Kochava_attributionResult:(NSDictionary *)attributionResult;
 
 @end
 
@@ -20,6 +23,12 @@
 - (void)initWithOptions:(NSDictionary*) options
 {
     kochavaTracker = [[KochavaTracker alloc] initKochavaWithParams: options];
+    kochavaTracker.trackerDelegate = self;
+}
+
+- (void) Kochava_attributionResult:(NSDictionary *)attributionResult
+{
+    _attrResult = attributionResult;
 }
 
 - (void)trackEvent:(NSString*) eventTitle withValue:(NSString*) eventValue
@@ -45,12 +54,24 @@
 
 - (NSString*)getAttributionData
 {
-    NSDictionary* data = [kochavaTracker retrieveAttribution];
-    if (!data) 
+    //NSDictionary* data = [kochavaTracker retrieveAttribution];
+    if (!_attrResult || _attrResult == nil || ![NSJSONSerialization isValidJSONObject: _attrResult]) 
     {
-        return @"{\"network\": \"unknown\"}";
+        NSLog(@"NO ATTR RESULT FOUND");
+        return @"null";
     }
 
+     NSError *error;
+     NSData *jsonData = [NSJSONSerialization dataWithJSONObject: _attrResult
+                                                        options: 0
+                                                          error: &error];
+
+     if (!jsonData) {
+        NSLog(@"getAttributionData error: %@", error.localizedDescription);
+        return @"null";
+     } else {
+        return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+     } 
 }
 
 @end
@@ -83,8 +104,6 @@ extern "C"
 
     void jwkIdentityLink(const char *sOptions)
     {
-        myKochava = [[JWKochava alloc] init];
-
 		NSString *optsJson = [ [NSString alloc] initWithUTF8String: sOptions ];
         NSData *data = [optsJson dataUsingEncoding: NSUTF8StringEncoding];
         NSError *error;
@@ -109,5 +128,10 @@ extern "C"
     const char * jwkKochavaId()
     {
         return [[myKochava getKochavaId] UTF8String];
+    }
+
+    const char * jwkGetAttributionData()
+    {
+        return [[myKochava getAttributionData] UTF8String];
     }
 }

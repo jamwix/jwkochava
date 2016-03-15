@@ -184,12 +184,8 @@ public class JWKochava extends Extension {
             data = _kTracker.getAttributionData();
         }
 
-        if (data == null || data == "") {
-            return "{\"network_name\": \"unknown\"}";
-        }
-
-        if (data == "false") {
-            return "{\"network_name\": \"organic\"}";
+        if (data == null) {
+            return "null";
         }
 
         return data;

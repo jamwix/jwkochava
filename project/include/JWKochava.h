@@ -10,6 +10,7 @@ namespace jwkochava {
         void jwkTrackEvent(const char *sTitle, const char *sValue);
         void jwkIdentityLink(const char *sOptions);
         const char * jwkKochavaId();
+        const char * jwkGetAttributionData();
     }
 	
 }

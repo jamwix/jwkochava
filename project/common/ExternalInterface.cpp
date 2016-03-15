@@ -38,6 +38,12 @@ static value jwkochava_get_kochava_id()
 }
 DEFINE_PRIM (jwkochava_get_kochava_id, 0);
 
+static value jwkochava_get_attribution_data() 
+{
+    return alloc_string(jwkGetAttributionData());
+}
+DEFINE_PRIM (jwkochava_get_attribution_data, 0);
+
 extern "C" void jwkochava_main () {
 	
 	val_int(0); // Fix Neko init
