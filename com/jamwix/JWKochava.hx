@@ -101,23 +101,23 @@ class JWKochava {
 
 	public static function getAttributionData():Dynamic
 	{
-#if (ios || android)
+#if (android || ios)
 		var dataStr:String = jwkochava_get_attribution_data();
+		if (dataStr == null || dataStr == "null" || dataStr == "") return null;
+		if (dataStr == "false") return {};
+
 		var data:Dynamic;
+		trace("DATASTR: " + dataStr);
 		try {
 			data = Json.parse(dataStr);
 		} catch (err:String) {
 			trace("unable to parse attr data: " + dataStr + " ERR: " + err);
-			return {network_name: "unknown"};
+			return null;
 		}
 
-		if (data.network_name == null && data.network == null)
-		{
-			data.network_name = "organic";
-		}
 		return data;
 #else
-		return {network_name: "unknown"};
+		return null;
 #end
 	}
 }
